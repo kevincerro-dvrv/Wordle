@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour {
 
     void Start() {
         wordToGuess = WordCollection.GetGuessWord();
+        Debug.Log("Word to guess: " + wordToGuess);
     }
 
     // Update is called once per frame
@@ -47,9 +48,27 @@ public class GameManager : MonoBehaviour {
         }
     }
 
-    private int[] TestWord(string candidateWord, string wordToGuess) {
-        int[] status = new int[WordPanel.NUMBER_OF_LETTERS];
+    private LetterStatus[] TestWord(string candidateWord, string wordToGuess) {
+        LetterStatus[] status = new LetterStatus[WordPanel.NUMBER_OF_LETTERS];
+
+        status[0] = TestCharacter(0, candidateWord[0], wordToGuess);
+        status[1] = TestCharacter(1, candidateWord[1], wordToGuess);
+        status[2] = TestCharacter(2, candidateWord[2], wordToGuess);
+        status[3] = TestCharacter(3, candidateWord[3], wordToGuess);
+        status[4] = TestCharacter(4, candidateWord[4], wordToGuess);
 
         return status;
+    }
+
+    private LetterStatus TestCharacter(int index, char character, string wordToGuess) {
+        if (wordToGuess[index] == character) {
+            return LetterStatus.Green;
+        }
+
+        if (wordToGuess.Contains(character)) {
+            return LetterStatus.Orange;
+        }
+
+        return LetterStatus.Gray;
     }
 }

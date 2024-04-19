@@ -59,7 +59,9 @@ public class WordPanel : MonoBehaviour {
         return word;
     }
 
-    public void SetStatus(int[] status) {
-        
+    public void SetStatus(LetterStatus[] status) {
+        for(int i=0; i<letterIndex; i++) {
+            letters[i].SetStatus(status[i]);
+        }
     }
 }
