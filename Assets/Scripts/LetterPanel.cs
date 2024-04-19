@@ -1,12 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using TMPro;
 
-public class LetterPanel : MonoBehaviour
-{
+public class LetterPanel : MonoBehaviour {
     public TextMeshProUGUI letterField;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -19,23 +17,19 @@ public class LetterPanel : MonoBehaviour
         
     }
 
-    public Vector2 GetSize()
-    {
-        return new Vector2(80f, 80f);
+    public Vector2 GetSize() {
+        return new Vector2(80, 80);
     }
 
-    public string GetLetter()
-    {
+    public void SetLetter(char letter) {
+        letterField.text = letter.ToString();
+    }
+
+    public string GetLetter() {
         return letterField.text;
     }
 
-    public void SetLetter(char letter)
-    {
-        letterField.SetText(letter.ToString());
-    }
-
-    public void RemoveLetter()
-    {
-        letterField.SetText("");
+    public void RemoveLetter() {
+        letterField.text = "";
     }
 }

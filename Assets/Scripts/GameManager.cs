@@ -1,48 +1,55 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-public class GameManager : MonoBehaviour
-{
+public class GameManager : MonoBehaviour {
+    public static GameManager instance;
+    public Button buttonSend;
+    public GameObject notValidWordPanel;
+
     public WordPanel wordPanel;
 
-    public static GameManager instance;
-
-    public bool canSubmit = false;
-
-    void Awake()
-    {
+    private string wordToGuess;
+    
+    void Awake() {    
         instance = this;
     }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    void Start() {
+        wordToGuess = WordCollection.GetGuessWord();
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Backspace)) {
-            wordPanel.RemoveLetter();
+    void Update() {
+        if(Input.anyKeyDown) {
+            //Debug.Log("[GameManager] Update " +  Input.inputString);
+            if(Input.inputString.Length > 0) {
+                if(char.IsLetter(Input.inputString[0])) {
+                    wordPanel.AddLetter(Input.inputString.ToUpper()[0]);
+                }
+            } 
+            if (Input.GetKeyDown(KeyCode.Backspace)) {
+                wordPanel.RemoveLetter();
+            } 
+        }       
+    }
 
-            return;
+    public void IsWordComplete(bool isComplete) {
+        buttonSend.interactable = isComplete;
+    }
+
+    public void ButtonSendOnClick() {
+        if(WordCollection.TestValidWord(wordPanel.GetWord())) {
+            wordPanel.SetStatus(TestWord(wordPanel.GetWord(), wordToGuess));
+        } else {
+            notValidWordPanel.SetActive(true);
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.Return) && canSubmit) {
-            if (WordCollection.TestValidWord(wordPanel.GetWord())) {
-                Debug.Log("Acertaste");
-            }
+    private int[] TestWord(string candidateWord, string wordToGuess) {
+        int[] status = new int[WordPanel.NUMBER_OF_LETTERS];
 
-            return;
-        }
-
-        if (Input.anyKeyDown && Input.inputString.Length > 0) {
-            char letter = Input.inputString.ToUpper()[0];
-            if (char.IsLetter(letter)) {
-                wordPanel.AddLetter(Input.inputString.ToUpper()[0]);
-            }
-        }
+        return status;
     }
 }
