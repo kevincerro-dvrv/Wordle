@@ -13,17 +13,30 @@ public class LetterPanel : MonoBehaviour {
     public GameObject orangePanel;
     
     private bool rotate = false;
+    private int rotationPhase = 0;
+    private LetterStatus effectiveStatus;
+
     // Start is called before the first frame update
     void Start() {
         
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update() {        
         if(rotate) {
             transform.Rotate(transform.right * Time.deltaTime * 90);
+
+            if (rotationPhase == 0 && transform.rotation.eulerAngles.x >= 89) {
+                rotationPhase = 1;
+                Vector3 newEulerAngles  = transform.eulerAngles;
+                newEulerAngles.x = 270;
+                transform.eulerAngles = newEulerAngles;
+                SetEffectiveStatus();
+            } else if (rotationPhase == 1 && transform.rotation.eulerAngles.x >= 359) {
+                rotationPhase = 2;
+                rotate = false;
+            }
         }
-        
     }
 
     public Vector2 GetSize() {
@@ -43,12 +56,20 @@ public class LetterPanel : MonoBehaviour {
     }
 
     public void SetStatus(LetterStatus status) {
-        whitePanel.SetActive(false);
+        whitePanel.SetActive(true);
         greenPanel.SetActive(false);
         greyPanel.SetActive(false);
         orangePanel.SetActive(false);
 
-        switch(status) {
+        effectiveStatus = status;
+
+        rotate = true;
+    }
+
+    public void SetEffectiveStatus()
+    {
+        whitePanel.SetActive(false);
+        switch(effectiveStatus) {
             case LetterStatus.Green: 
                greenPanel.SetActive(true);
                break;
@@ -59,8 +80,6 @@ public class LetterPanel : MonoBehaviour {
                orangePanel.SetActive(true);
                break;
         }
-
-        rotate = true;
     }
 }
 
