@@ -60,8 +60,13 @@ public class WordPanel : MonoBehaviour {
     }
 
     public void SetStatus(LetterStatus[] status) {
-        for(int i=0; i<letterIndex; i++) {
+        StartCoroutine(SetStatusCoroutine(status));
+    }
+
+    private IEnumerator SetStatusCoroutine(LetterStatus[] status) {
+        for(int i=0; i<NUMBER_OF_LETTERS; i++) {
             letters[i].SetStatus(status[i]);
-        }
+            yield return new WaitForSeconds(0.2f);
+        }        
     }
 }

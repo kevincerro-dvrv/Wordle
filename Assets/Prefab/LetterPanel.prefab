@@ -490,5 +490,5 @@ MonoBehaviour:
   letterField: {fileID: 8829322219768453541}
   whitePanel: {fileID: 5933542921702652378}
   greenPanel: {fileID: 4304044077403024685}
-  grayPanel: {fileID: 638055960494391087}
+  greyPanel: {fileID: 638055960494391087}
   orangePanel: {fileID: 85014968614960011}

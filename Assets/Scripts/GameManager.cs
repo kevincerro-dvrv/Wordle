@@ -9,6 +9,9 @@ public class GameManager : MonoBehaviour {
     public GameObject notValidWordPanel;
 
     public WordPanel wordPanel;
+    public Transform wordPanelContainer;
+    public GameObject wordPanelPrefab;
+    private int tryNumber;
 
     private string wordToGuess;
     
@@ -18,11 +21,15 @@ public class GameManager : MonoBehaviour {
 
     void Start() {
         wordToGuess = WordCollection.GetGuessWord();
-        Debug.Log("Word to guess: " + wordToGuess);
+        tryNumber = 0;
     }
 
     // Update is called once per frame
     void Update() {
+        if(wordPanel == null) {
+            return;
+        }
+
         if(Input.anyKeyDown) {
             //Debug.Log("[GameManager] Update " +  Input.inputString);
             if(Input.inputString.Length > 0) {
@@ -43,6 +50,8 @@ public class GameManager : MonoBehaviour {
     public void ButtonSendOnClick() {
         if(WordCollection.TestValidWord(wordPanel.GetWord())) {
             wordPanel.SetStatus(TestWord(wordPanel.GetWord(), wordToGuess));
+            buttonSend.interactable = false;
+            StartCoroutine(InstantiateNewPanel());
         } else {
             notValidWordPanel.SetActive(true);
         }
@@ -51,24 +60,43 @@ public class GameManager : MonoBehaviour {
     private LetterStatus[] TestWord(string candidateWord, string wordToGuess) {
         LetterStatus[] status = new LetterStatus[WordPanel.NUMBER_OF_LETTERS];
 
-        status[0] = TestCharacter(0, candidateWord[0], wordToGuess);
-        status[1] = TestCharacter(1, candidateWord[1], wordToGuess);
-        status[2] = TestCharacter(2, candidateWord[2], wordToGuess);
-        status[3] = TestCharacter(3, candidateWord[3], wordToGuess);
-        status[4] = TestCharacter(4, candidateWord[4], wordToGuess);
+        char[] wordToGuessChars = wordToGuess.ToUpper().ToCharArray();
+        char[] candidateWordChars = candidateWord.ToUpper().ToCharArray();
+
+        for(int i=0; i<WordPanel.NUMBER_OF_LETTERS; i++) {
+            if(candidateWordChars[i] == wordToGuessChars[i]) {
+                status[i] = LetterStatus.Green;
+                wordToGuessChars[i] = '*';
+                candidateWordChars[i] = '*';
+            } else {
+                status[i] = LetterStatus.Gray;
+            }
+        }
+
+        for(int i=0; i<WordPanel.NUMBER_OF_LETTERS; i++) {
+            if(candidateWordChars[i] != '*') {
+                for(int j=0; j<WordPanel.NUMBER_OF_LETTERS; j++) {
+                    if(candidateWordChars[i] == wordToGuessChars[j]) {
+                        status[i] = LetterStatus.Orange;
+                        wordToGuessChars[j] = '*';
+                        candidateWordChars[i] = '*';
+                        break;
+                    }
+                }
+            }
+        }
 
         return status;
     }
 
-    private LetterStatus TestCharacter(int index, char character, string wordToGuess) {
-        if (wordToGuess[index] == character) {
-            return LetterStatus.Green;
-        }
+    private IEnumerator InstantiateNewPanel() {
+        wordPanel = null;
+        tryNumber++;
+        
+        yield return new WaitForSeconds(2f);
 
-        if (wordToGuess.Contains(character)) {
-            return LetterStatus.Orange;
-        }
-
-        return LetterStatus.Gray;
+        wordPanel = Instantiate(wordPanelPrefab, wordPanelContainer).GetComponent<WordPanel>();
+        RectTransform rt = wordPanel.GetComponent<RectTransform>();
+        rt.anchoredPosition = new Vector2(0f, tryNumber * -100f);
     }
 }
