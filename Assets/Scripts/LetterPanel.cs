@@ -12,31 +12,52 @@ public class LetterPanel : MonoBehaviour {
     public GameObject greyPanel;
     public GameObject orangePanel;
     
-    private bool rotate = false;
-    private int rotationPhase = 0;
-    private LetterStatus effectiveStatus;
 
+
+    private const int ROTATION_STATUS_WAITING = 0;
+    private const int ROTATION_STATUS_ROTATING_1_HALF = 1;
+    private const int ROTATION_STATUS_ROTATING_2_HALF = 2;
+    private const int ROTATION_STATUS_COMPLETED = 3; 
+
+    private float t;
+    private float rotationTime = 2f;
+
+    private Quaternion startRotation;
+    private Quaternion invertedRotation;
+
+    private LetterStatus status;
+
+    private int rotationStatus;
     // Start is called before the first frame update
     void Start() {
-        
+        rotationStatus = ROTATION_STATUS_WAITING;
+        startRotation = transform.rotation;
+        invertedRotation = Quaternion.AngleAxis(180f, transform.right);
     }
 
     // Update is called once per frame
-    void Update() {        
-        if(rotate) {
-            transform.Rotate(transform.right * Time.deltaTime * 90);
+    void Update() {
+        if(rotationStatus == ROTATION_STATUS_ROTATING_1_HALF) {
 
-            if (rotationPhase == 0 && transform.rotation.eulerAngles.x >= 89) {
-                rotationPhase = 1;
-                Vector3 newEulerAngles  = transform.eulerAngles;
-                newEulerAngles.x = 270;
-                transform.eulerAngles = newEulerAngles;
-                SetEffectiveStatus();
-            } else if (rotationPhase == 1 && transform.rotation.eulerAngles.x >= 359) {
-                rotationPhase = 2;
-                rotate = false;
+            transform.rotation = Quaternion.Lerp (startRotation, invertedRotation, t);
+            t += Time.deltaTime / rotationTime;
+            if(t>= 0.5f) {
+                rotationStatus = ROTATION_STATUS_ROTATING_2_HALF;
+                transform.rotation = Quaternion.AngleAxis(270f, transform.right);
+                Debug.Log("[LetterPanel] Update rotationPhaseChange");
+                ApplyStatus();
+            } 
+   
+        }  else if(rotationStatus == ROTATION_STATUS_ROTATING_2_HALF) {
+            transform.rotation = Quaternion.Lerp (invertedRotation, startRotation, t);
+            t += Time.deltaTime / rotationTime;
+            if(t >= 1f) {
+                rotationStatus = ROTATION_STATUS_COMPLETED;
+                transform.rotation = Quaternion.identity;
             }
+
         }
+        
     }
 
     public Vector2 GetSize() {
@@ -56,20 +77,18 @@ public class LetterPanel : MonoBehaviour {
     }
 
     public void SetStatus(LetterStatus status) {
-        whitePanel.SetActive(true);
+        this.status = status;
+        rotationStatus = ROTATION_STATUS_ROTATING_1_HALF;
+        t = 0;
+    }
+
+    private void ApplyStatus() {
+        whitePanel.SetActive(false);
         greenPanel.SetActive(false);
         greyPanel.SetActive(false);
         orangePanel.SetActive(false);
 
-        effectiveStatus = status;
-
-        rotate = true;
-    }
-
-    public void SetEffectiveStatus()
-    {
-        whitePanel.SetActive(false);
-        switch(effectiveStatus) {
+        switch(status) {
             case LetterStatus.Green: 
                greenPanel.SetActive(true);
                break;

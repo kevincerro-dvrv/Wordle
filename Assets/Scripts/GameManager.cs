@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour {
     public static GameManager instance;
     public Button buttonSend;
     public GameObject notValidWordPanel;
+    public GameObject winPanel;
+    public GameObject losePanel;
 
     public WordPanel wordPanel;
     public Transform wordPanelContainer;
@@ -49,9 +51,20 @@ public class GameManager : MonoBehaviour {
 
     public void ButtonSendOnClick() {
         if(WordCollection.TestValidWord(wordPanel.GetWord())) {
-            wordPanel.SetStatus(TestWord(wordPanel.GetWord(), wordToGuess));
+            LetterStatus[] status = TestWord(wordPanel.GetWord(), wordToGuess);
+            wordPanel.SetStatus(status);
             buttonSend.interactable = false;
-            StartCoroutine(InstantiateNewPanel());
+            if(IsVictory(status)) {
+                //Mostrar Panel de victoria
+                winPanel.SetActive(true);
+            } else {
+                if(tryNumber < 5) {
+                   StartCoroutine(InstantiateNewPanel());
+                } else {
+                    //Mostrar panel de derrota
+                    losePanel.SetActive(true);
+                }
+            }
         } else {
             notValidWordPanel.SetActive(true);
         }
@@ -87,6 +100,15 @@ public class GameManager : MonoBehaviour {
         }
 
         return status;
+    }
+
+    private bool IsVictory(LetterStatus[] status) {
+        for(int i=0; i<status.Length; i++) {
+            if(status[i] != LetterStatus.Green) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private IEnumerator InstantiateNewPanel() {
